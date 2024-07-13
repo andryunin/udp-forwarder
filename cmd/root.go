@@ -13,6 +13,7 @@ import (
 
 var listenAddr *net.UDPAddr
 var targetAddr *net.UDPAddr
+var waitResponseSeconds int
 
 func parseAddr(s string) (*net.UDPAddr, error) {
 	addr, err := net.ResolveUDPAddr("udp", s)
@@ -56,7 +57,7 @@ var rootCmd = &cobra.Command{
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
-		err := internal.RunServer(listenAddr, targetAddr, 5*time.Second)
+		err := internal.RunServer(listenAddr, targetAddr, time.Duration(waitResponseSeconds)*time.Second)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -74,4 +75,7 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.Flags().IntVarP(
+		&waitResponseSeconds, "timeout", "t", 60, "How many seconds wait for target response",
+	)
 }
